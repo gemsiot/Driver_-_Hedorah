@@ -100,17 +100,20 @@ String Hedorah::getData(time_t time)
 	if(getSensorPort() != 0) { //If sensor detected
 		bool dummy1;
 		bool dummy2;
+		time_t localTime = millis();
+		while((millis() - wakeTime) < 5000 && (millis() - localTime) < 30000); //Wait for it to be 20 seconds since startup to have legit value, catch with a 30 second override 
 		begin(0, dummy1, dummy2); //DEBUG!
 		// ret = presSensor.measureTempOnce(temperatureDPS368, oversampling); //Measure temp
-		time_t localTime = millis();
-		while(gasSensor.dataAvailable() == false && (millis() - localTime) < 30000) { //Wait up to 30 seconds for new data
+		localTime = millis();
+		while(gasSensor.dataAvailable() == false && (millis() - localTime) < 30000) { //Wait up to 30 seconds for new data //DEBUG!
 			delay(1s); 
 		}
 		if(gasSensor.dataAvailable() == false) {
-			//THROW ERROR!
-			Serial.println("CO2 Timeout!"); //DEBUG!
+			throwError(SENSOR_TIMEOUT | talonPortErrorCode | sensorPortErrorCode | 0x200); //OR with new data timeout error
+			// Serial.println("CO2 Timeout!"); //DEBUG!
 		}
 		bool status = gasSensor.readMeasurement(); //Sync new readings
+		// bool status = true; //DEBUG!
 		if(status == true) {
 			float co2 = gasSensor.getCO2();
 			float temp = gasSensor.getTemperature();
