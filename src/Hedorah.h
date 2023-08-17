@@ -52,7 +52,8 @@ class Hedorah: public Sensor
 		// uint8_t port = 0;
 		// int throwError(uint32_t error);
 
-		bool initDone = false; //Used to keep track if the initaliztion has run - used by hasReset() 
+		bool initDone = false; //Used to keep track if the initaliztion has run - used by hasReset()
+		uint8_t attemptCountMax = 3; //How many times the system will retry to read  
 		
 
 		// uint32_t errors[MAX_NUM_ERRORS] = {0};

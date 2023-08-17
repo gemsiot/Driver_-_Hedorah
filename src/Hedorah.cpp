@@ -101,7 +101,7 @@ String Hedorah::getData(time_t time)
 		bool dummy1;
 		bool dummy2;
 		time_t localTime = millis();
-		while((millis() - wakeTime) < 5000 && (millis() - localTime) < 30000); //Wait for it to be 20 seconds since startup to have legit value, catch with a 30 second override 
+		while((millis() - wakeTime) < 5000 && (millis() - localTime) < 30000); //Wait for it to be 5 seconds since startup to have legit value, catch with a 30 second override 
 		begin(0, dummy1, dummy2); //DEBUG!
 		// ret = presSensor.measureTempOnce(temperatureDPS368, oversampling); //Measure temp
 		localTime = millis();
@@ -112,7 +112,12 @@ String Hedorah::getData(time_t time)
 			throwError(SENSOR_TIMEOUT | talonPortErrorCode | sensorPortErrorCode | 0x200); //OR with new data timeout error
 			// Serial.println("CO2 Timeout!"); //DEBUG!
 		}
-		bool status = gasSensor.readMeasurement(); //Sync new readings
+		bool status = false; //Use to check status of measurment 
+		uint8_t attemptCount = 0; //Keep track of how many times a measure has been tried
+		do {
+			status = gasSensor.readMeasurement(); //Sync new readings
+			attemptCount++;
+		} while(status == false && attemptCount < attemptCountMax);
 		// bool status = true; //DEBUG!
 		if(status == true) {
 			float co2 = gasSensor.getCO2();
@@ -126,6 +131,7 @@ String Hedorah::getData(time_t time)
 			// dps368Data = dps368Data + String(temperatureDPS368,2) + ","; //Append temp with 2 decimal points since resolution is 0.01°C, add comma
 			// dps368Data = dps368Data + "Pressure" + String()
 		}
+		if(attemptCount > 0) throwError(REPEATED_READ_ATTEMPT | talonPortErrorCode | sensorPortErrorCode);
 	}
 	else {
 		throwError(FIND_FAIL); //Report failure to find
