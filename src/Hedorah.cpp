@@ -1,3 +1,5 @@
+//© 2023 Regents of the University of Minnesota. All rights reserved.
+
 #include <Hedorah.h>
 
 Hedorah::Hedorah(uint8_t talonPort_, uint8_t sensorPort_, uint8_t version): gasSensor()
